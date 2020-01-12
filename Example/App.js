@@ -15,7 +15,7 @@ UIManager.setLayoutAnimationEnabledExperimental &&
 type State = {
   hasLoggedInOnce: boolean,
   accessToken: ?string,
-  accessTokenExpirationDate: ?string,
+  accessTokenExpirationTime: ?string,
   refreshToken: ?string,
 };
 
@@ -35,7 +35,7 @@ const config = {
 const defaultAuthState = {
   hasLoggedInOnce: false,
   accessToken: '',
-  accessTokenExpirationDate: '',
+  accessTokenExpirationTime: '',
   refreshToken: '',
 };
 
@@ -67,7 +67,7 @@ export default () => {
 
   const handleOnlyTokenExchange = useCallback(async () => {
     try {
-      const newAuthState = await onlyTokenExchange();
+      const newAuthState = await onlyTokenExchange(config);
 
       console.log(newAuthState);
     } catch (error) {
@@ -99,7 +99,7 @@ export default () => {
 
       setAuthState({
         accessToken: '',
-        accessTokenExpirationDate: '',
+        accessTokenExpirationTime: '',
         refreshToken: '',
       });
     } catch (error) {
@@ -113,8 +113,8 @@ export default () => {
         <Form>
           <FormLabel>accessToken</FormLabel>
           <FormValue>{authState.accessToken}</FormValue>
-          <FormLabel>accessTokenExpirationDate</FormLabel>
-          <FormValue>{authState.accessTokenExpirationDate}</FormValue>
+          <FormLabel>accessTokenExpirationTime</FormLabel>
+          <FormValue>{authState.accessTokenExpirationTime}</FormValue>
           <FormLabel>refreshToken</FormLabel>
           <FormValue>{authState.refreshToken}</FormValue>
           <FormLabel>scopes</FormLabel>

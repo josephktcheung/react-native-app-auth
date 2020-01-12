@@ -360,7 +360,7 @@ RCT_REMAP_METHOD(refresh,
     [dateFormat setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss'Z'"];
 
     return @{@"accessToken": response.accessToken ? response.accessToken : @"",
-             @"accessTokenExpirationDate": response.accessTokenExpirationDate ? [dateFormat stringFromDate:response.accessTokenExpirationDate] : @"",
+             @"accessTokenExpirationTime": response.accessTokenExpirationTime ? [dateFormat stringFromDate:response.accessTokenExpirationTime] : @"",
              @"additionalParameters": response.additionalParameters,
              @"idToken": response.idToken ? response.idToken : @"",
              @"refreshToken": response.refreshToken ? response.refreshToken : @"",
@@ -380,7 +380,7 @@ RCT_REMAP_METHOD(refresh,
     [dateFormat setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss'Z'"];
 
     return @{@"accessToken": response.accessToken ? response.accessToken : @"",
-             @"accessTokenExpirationDate": response.accessTokenExpirationDate ? [dateFormat stringFromDate:response.accessTokenExpirationDate] : @"",
+             @"accessTokenExpirationTime": response.accessTokenExpirationTime ? [dateFormat stringFromDate:response.accessTokenExpirationTime] : @"",
              @"authorizeAdditionalParameters": authResponse.additionalParameters,
              @"tokenAdditionalParameters": response.additionalParameters,
              @"idToken": response.idToken ? response.idToken : @"",

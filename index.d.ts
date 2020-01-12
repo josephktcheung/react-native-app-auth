@@ -88,7 +88,7 @@ export interface AuthorizeResult {
 
 export interface RefreshResult {
   accessToken: string;
-  accessTokenExpirationDate: string;
+  accessTokenExpirationTime: string;
   additionalParameters: { [name: string]: string };
   idToken: string;
   refreshToken: string;
