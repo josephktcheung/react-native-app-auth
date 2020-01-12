@@ -9,7 +9,7 @@ import com.facebook.react.bridge.WritableMap;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.TokenResponse;
 
-public final class TokenResponseFactory {
+public final class ResponseFactory {
 
     private static final WritableArray createScopeArray(String scope) {
         WritableArray scopeArray = Arguments.createArray();
@@ -48,21 +48,13 @@ public final class TokenResponseFactory {
     /*
      * Read raw token response into a React Native map to be passed down the bridge
      */
-    public static final WritableMap tokenResponseToMap(TokenResponse response, AuthorizationResponse authResponse) {
+    public static final WritableMap authorizationResponseToMap(AuthorizationResponse response) {
         WritableMap map = Arguments.createMap();
 
-        map.putString("accessToken", response.accessToken);
-        map.putMap("authorizeAdditionalParameters", MapUtil.createAdditionalParametersMap(authResponse.additionalParameters));
-        map.putMap("tokenAdditionalParameters", MapUtil.createAdditionalParametersMap(response.additionalParameters));
-        map.putString("idToken", response.idToken);
-        map.putString("refreshToken", response.refreshToken);
-        map.putString("tokenType", response.tokenType);
-        map.putArray("scopes", createScopeArray(authResponse.scope));
-
-        if (response.accessTokenExpirationTime != null) {
-            map.putString("accessTokenExpirationDate", DateUtil.formatTimestamp(response.accessTokenExpirationTime));
-        }
-
+        map.putMap("additionalParameters", createAdditionalParametersMap(response.additionalParameters));
+        map.putArray("scopes", createScopeArray(response.scope));
+        map.putString("authorizationCode", response.authorizationCode);
+        map.putString("state", response.state);
 
         return map;
     }

@@ -142,7 +142,7 @@ export const register = ({
   return RNAppAuth.register(...nativeMethodArguments);
 };
 
-export const authorize = ({
+export const onlyAuthorize = ({
   issuer,
   redirectUrl,
   clientId,
@@ -184,7 +184,46 @@ export const authorize = ({
     nativeMethodArguments.push(usePKCE);
   }
 
-  return RNAppAuth.authorize(...nativeMethodArguments);
+  return RNAppAuth.onlyAuthorize(...nativeMethodArguments);
+};
+
+export const onlyTokenExchange = () => {
+  return RNAppAuth.onlyTokenExchange();
+};
+
+export const authorize = async ({
+  issuer,
+  redirectUrl,
+  clientId,
+  clientSecret,
+  scopes,
+  useNonce = true,
+  usePKCE = true,
+  additionalParameters,
+  serviceConfiguration,
+  clientAuthMethod = 'basic',
+  dangerouslyAllowInsecureHttpRequests = false,
+  customHeaders,
+}) => {
+  const authRespone = await onlyAuthorize({
+    issuer,
+    redirectUrl,
+    clientId,
+    clientSecret,
+    scopes,
+    useNonce,
+    usePKCE,
+    additionalParameters,
+    serviceConfiguration,
+    clientAuthMethod,
+    dangerouslyAllowInsecureHttpRequests,
+    customHeaders,
+  });
+  const tokenExhangeResponse = await RNAppAuth.onlyTokenExchange();
+  return {
+    ...authRespone,
+    ...tokenExhangeResponse,
+  };
 };
 
 export const refresh = (

@@ -26,7 +26,7 @@ import com.facebook.react.bridge.ReadableType;
 import com.rnappauth.utils.MapUtil;
 import com.rnappauth.utils.UnsafeConnectionBuilder;
 import com.rnappauth.utils.RegistrationResponseFactory;
-import com.rnappauth.utils.TokenResponseFactory;
+import com.rnappauth.utils.ResponseFactory;
 import com.rnappauth.utils.CustomConnectionBuilder;
 
 import net.openid.appauth.AppAuthConfiguration;
@@ -67,6 +67,7 @@ public class RNAppAuthModule extends ReactContextBaseJavaModule implements Activ
     private Map<String, String> tokenRequestHeaders = null;
     private Map<String, String> additionalParametersMap;
     private String clientSecret;
+    private AuthorizationResponse lastAuthorizeResponse;
     private final AtomicReference<AuthorizationServiceConfiguration> mServiceConfiguration = new AtomicReference<>();
     private boolean isPrefetched = false;
 
@@ -207,7 +208,7 @@ public class RNAppAuthModule extends ReactContextBaseJavaModule implements Activ
     }
 
     @ReactMethod
-    public void authorize(
+    public void onlyAuthorize(
             String issuer,
             final String redirectUrl,
             final String clientId,
@@ -280,11 +281,46 @@ public class RNAppAuthModule extends ReactContextBaseJavaModule implements Activ
                     builder
             );
         }
-
-
-
-
     }
+
+    @ReactMethod
+    public void onlyTokenExchange(final Promise promise) {
+        if (this.lastAuthorizeResponse == null) {
+            promise.reject("no_authorization_context", "authorize_not_called");
+            return;
+        }
+
+        final AppAuthConfiguration configuration = createAppAuthConfiguration(
+                createConnectionBuilder(this.dangerouslyAllowInsecureHttpRequests)
+        );
+
+        AuthorizationService authService = new AuthorizationService(this.reactContext, configuration);
+
+        TokenRequest tokenRequest = this.lastAuthorizeResponse.createTokenExchangeRequest(this.additionalParametersMap);
+
+        AuthorizationService.TokenResponseCallback tokenResponseCallback = new AuthorizationService.TokenResponseCallback() {
+
+            @Override
+            public void onTokenRequestCompleted(
+                    TokenResponse resp, AuthorizationException ex) {
+                if (resp != null) {
+                    WritableMap map = ResponseFactory.tokenResponseToMap(resp);
+                    promise.resolve(map);
+                } else {
+                    promise.reject("Failed exchange token", ex.errorDescription);
+                }
+            }
+        };
+
+        if (this.clientSecret != null) {
+            ClientAuthentication clientAuth = new ClientSecretBasic(this.clientSecret);
+            authService.performTokenRequest(tokenRequest, clientAuth, tokenResponseCallback);
+
+        } else {
+            authService.performTokenRequest(tokenRequest, tokenResponseCallback);
+        }
+    }
+
 
     @ReactMethod
     public void refresh(
@@ -391,41 +427,8 @@ public class RNAppAuthModule extends ReactContextBaseJavaModule implements Activ
                 return;
             }
 
-            final Promise authorizePromise = this.promise;
-            final AppAuthConfiguration configuration = createAppAuthConfiguration(
-                    createConnectionBuilder(this.dangerouslyAllowInsecureHttpRequests, this.tokenRequestHeaders)
-            );
-
-            AuthorizationService authService = new AuthorizationService(this.reactContext, configuration);
-
-            TokenRequest tokenRequest = response.createTokenExchangeRequest(this.additionalParametersMap);
-
-            AuthorizationService.TokenResponseCallback tokenResponseCallback = new AuthorizationService.TokenResponseCallback() {
-
-                @Override
-                public void onTokenRequestCompleted(
-                        TokenResponse resp, AuthorizationException ex) {
-                    if (resp != null) {
-                        WritableMap map = TokenResponseFactory.tokenResponseToMap(resp, response);
-                        if (authorizePromise != null) {
-                            authorizePromise.resolve(map);
-                        }
-                    } else {
-                        if (promise != null) {
-                            promise.reject("token_exchange_failed", getErrorMessage(ex));
-                        }
-                    }
-                }
-            };
-
-            if (this.clientSecret != null) {
-                ClientAuthentication clientAuth = this.getClientAuthentication(this.clientSecret, this.clientAuthMethod);
-                authService.performTokenRequest(tokenRequest, clientAuth, tokenResponseCallback);
-
-            } else {
-                authService.performTokenRequest(tokenRequest, tokenResponseCallback);
-            }
-
+            this.lastAuthorizeResponse = response;
+            promise.resolve(ResponseFactory.authorizationResponseToMap(response));
         }
     }
 
@@ -607,7 +610,7 @@ public class RNAppAuthModule extends ReactContextBaseJavaModule implements Activ
             @Override
             public void onTokenRequestCompleted(@Nullable TokenResponse response, @Nullable AuthorizationException ex) {
                 if (response != null) {
-                    WritableMap map = TokenResponseFactory.tokenResponseToMap(response);
+                    WritableMap map = ResponseFactory.tokenResponseToMap(response);
                     promise.resolve(map);
                 } else {
                     promise.reject("token_refresh_failed", getErrorMessage(ex));
