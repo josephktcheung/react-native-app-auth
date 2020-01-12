@@ -10,7 +10,7 @@ import {
 
 const { RNAppAuth } = NativeModules;
 
-export default async (
+export default (
   {
     issuer,
     redirectUrl,
