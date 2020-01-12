@@ -283,21 +283,28 @@ public class RNAppAuthModule extends ReactContextBaseJavaModule implements Activ
     }
 
     @ReactMethod
-    public void onlyTokenExchange(final String clientSecret, final ReadableMap additionalParameters, final Boolean dangerouslyAllowInsecureHttpRequests, final Promise promise) {
+    public void onlyTokenExchange(
+            final String clientSecret,
+            final ReadableMap additionalParameters,
+            final Boolean dangerouslyAllowInsecureHttpRequests,
+            final ReadableMap headers,
+            final Promise promise
+    ) {
+        this.parseHeaderMap(headers);
         if (this.lastAuthorizeResponse == null) {
             promise.reject("no_authorization_context", "authorize_not_called");
             return;
         }
 
         final AppAuthConfiguration configuration = createAppAuthConfiguration(
-                this.createConnectionBuilder(dangerouslyAllowInsecureHttpRequests)
+                this.createConnectionBuilder(dangerouslyAllowInsecureHttpRequests, this.tokenRequestHeaders)
         );
 
         AuthorizationService authService = new AuthorizationService(this.reactContext, configuration);
 
         final HashMap<String, String> additionalParametersMap = MapUtil.readableMapToHashMap(additionalParameters);
 
-        TokenRequest tokenRequest = this.lastAuthorizeResponse.createTokenExchangeRequest(this.additionalParametersMap);
+        TokenRequest tokenRequest = this.lastAuthorizeResponse.createTokenExchangeRequest(additionalParametersMap);
 
         AuthorizationService.TokenResponseCallback tokenResponseCallback = new AuthorizationService.TokenResponseCallback() {
 
@@ -364,9 +371,9 @@ public class RNAppAuthModule extends ReactContextBaseJavaModule implements Activ
                         refreshPromise
                 );
             } catch (ActivityNotFoundException e) {
-                promise.reject("browser_not_found", e.getMessage());
+                refreshPromise.reject("browser_not_found", e.getMessage());
             } catch (Exception e) {
-                promise.reject("token_refresh_failed", e.getMessage());
+                refreshPromise.reject("token_refresh_failed", e.getMessage());
             }
         } else {
             final Uri issuerUri = Uri.parse(issuer);
@@ -409,7 +416,7 @@ public class RNAppAuthModule extends ReactContextBaseJavaModule implements Activ
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
         if (requestCode == 0) {
             if (data == null) {
-                if (promise != null) {
+                if (this.authorizePromise != null) {
                     this.authorizePromise.reject("authentication_error", "Data intent is null" );
                 }
                 return;
@@ -418,7 +425,7 @@ public class RNAppAuthModule extends ReactContextBaseJavaModule implements Activ
             final AuthorizationResponse response = AuthorizationResponse.fromIntent(data);
             AuthorizationException exception = AuthorizationException.fromIntent(data);
             if (exception != null) {
-                if (promise != null) {
+                if (this.authorizePromise != null) {
                     this.authorizePromise.reject("authentication_error", getErrorMessage(exception));
                 }
                 return;

@@ -51,7 +51,7 @@ public final class ResponseFactory {
     public static final WritableMap authorizationResponseToMap(AuthorizationResponse response) {
         WritableMap map = Arguments.createMap();
 
-        map.putMap("additionalParameters", createAdditionalParametersMap(response.additionalParameters));
+        map.putMap("additionalParameters", MapUtil.createAdditionalParametersMap(response.additionalParameters));
         map.putArray("scopes", createScopeArray(response.scope));
         map.putString("authorizationCode", response.authorizationCode);
         map.putString("state", response.state);
