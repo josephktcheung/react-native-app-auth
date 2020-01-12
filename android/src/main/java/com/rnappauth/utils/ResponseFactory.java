@@ -39,7 +39,7 @@ public final class ResponseFactory {
         map.putString("tokenType", response.tokenType);
 
         if (response.accessTokenExpirationTime != null) {
-            map.putString("accessTokenExpirationDate", DateUtil.formatTimestamp(response.accessTokenExpirationTime));
+            map.putString("accessTokenExpirationTime", DateUtil.formatTimestamp(response.accessTokenExpirationTime));
         }
 
         return map;

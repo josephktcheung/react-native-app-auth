@@ -1,6 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import { UIManager, LayoutAnimation, Alert } from 'react-native';
-import { authorize, refresh, revoke, onlyAuthorize, onlyTokenExchange } from 'react-native-app-auth';
+import {
+  authorize,
+  refresh,
+  revoke,
+  onlyAuthorize,
+  onlyTokenExchange,
+} from 'react-native-app-auth';
 import { Page, Button, ButtonContainer, Form, FormLabel, FormValue, Heading } from './components';
 
 UIManager.setLayoutAnimationEnabledExperimental &&
@@ -10,7 +16,7 @@ type State = {
   hasLoggedInOnce: boolean,
   accessToken: ?string,
   accessTokenExpirationDate: ?string,
-  refreshToken: ?string
+  refreshToken: ?string,
 };
 
 const config = {
@@ -22,15 +28,15 @@ const config = {
   serviceConfiguration: {
     authorizationEndpoint: 'https://demo.identityserver.io/connect/authorize',
     tokenEndpoint: 'https://demo.identityserver.io/connect/token',
-    revocationEndpoint: 'https://demo.identityserver.io/connect/revoke'
-  }
+    revocationEndpoint: 'https://demo.identityserver.io/connect/revoke',
+  },
 };
 
 const defaultAuthState = {
   hasLoggedInOnce: false,
   accessToken: '',
   accessTokenExpirationDate: '',
-  refreshToken: ''
+  refreshToken: '',
 };
 
 export default () => {
@@ -42,9 +48,8 @@ export default () => {
 
       setAuthState({
         hasLoggedInOnce: true,
-        ...newAuthState
+        ...newAuthState,
       });
-
     } catch (error) {
       Alert.alert('Failed to log in', error.message);
     }
@@ -73,14 +78,13 @@ export default () => {
   const handleRefresh = useCallback(async () => {
     try {
       const newAuthState = await refresh(config, {
-        refreshToken: authState.refreshToken
+        refreshToken: authState.refreshToken,
       });
 
       setAuthState(current => ({
         ...current,
-        ...newAuthState
-      }))
-
+        ...newAuthState,
+      }));
     } catch (error) {
       Alert.alert('Failed to refresh token', error.message);
     }
@@ -90,13 +94,13 @@ export default () => {
     try {
       await revoke(config, {
         tokenToRevoke: authState.accessToken,
-        sendClientId: true
+        sendClientId: true,
       });
 
       setAuthState({
         accessToken: '',
         accessTokenExpirationDate: '',
-        refreshToken: ''
+        refreshToken: '',
       });
     } catch (error) {
       Alert.alert('Failed to revoke token', error.message);
@@ -121,8 +125,8 @@ export default () => {
       )}
 
       <ButtonContainer>
-        <Button onPress={this.onlyAuthorize} text="Only Authorize" color="#00b300" />
-        <Button onPress={this.onlyTokenExchange} text="Only Token Exchange" color="#FFA500" />
+        <Button onPress={handleOnlyAuthorize} text="Only Authorize" color="#00b300" />
+        <Button onPress={handleOnlyTokenExchange} text="Only Token Exchange" color="#FFA500" />
         {!authState.accessToken ? (
           <Button onPress={handleAuthorize} text="Authorize" color="#DA2536" />
         ) : null}
@@ -135,4 +139,4 @@ export default () => {
       </ButtonContainer>
     </Page>
   );
-}
+};

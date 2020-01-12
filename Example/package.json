@@ -12,7 +12,7 @@
   "dependencies": {
     "react": "16.9.0",
     "react-native": "0.61.5",
-    "react-native-app-auth": "FormidableLabs/react-native-app-auth#master"
+    "react-native-app-auth": "josephktcheung/react-native-app-auth#feature/separate-auth-and-token-2"
   },
   "devDependencies": {
     "@babel/core": "^7.7.7",
