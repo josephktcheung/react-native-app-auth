@@ -199,6 +199,7 @@ describe('onlyAuthorize', () => {
         );
       });
     });
+
     describe('customHeaders parameter', () => {
       it('calls the native wrapper with headers', () => {
         const customTokenHeaders = { Authorization: 'Basic someBase64Value' };
@@ -222,6 +223,78 @@ describe('onlyAuthorize', () => {
           config.clientAuthMethod,
           false,
           customHeaders
+        );
+      });
+    });
+
+    describe('iOS-specific useNonce parameter', () => {
+      beforeEach(() => {
+        require('react-native').Platform.OS = 'ios';
+      });
+
+      it('calls the native wrapper with default value `true`', () => {
+        onlyAuthorize(config, { refreshToken: 'such-token' });
+        expect(mockAuthorize).toHaveBeenCalledWith(
+          config.issuer,
+          config.redirectUrl,
+          config.clientId,
+          config.clientSecret,
+          config.scopes,
+          config.additionalParameters,
+          config.serviceConfiguration,
+          true,
+          true
+        );
+      });
+
+      it('calls the native wrapper with passed value `false`', () => {
+        onlyAuthorize({ ...config, useNonce: false }, { refreshToken: 'such-token' });
+        expect(mockAuthorize).toHaveBeenCalledWith(
+          config.issuer,
+          config.redirectUrl,
+          config.clientId,
+          config.clientSecret,
+          config.scopes,
+          config.additionalParameters,
+          config.serviceConfiguration,
+          false,
+          true
+        );
+      });
+    });
+
+    describe('iOS-specific usePKCE parameter', () => {
+      beforeEach(() => {
+        require('react-native').Platform.OS = 'ios';
+      });
+
+      it('calls the native wrapper with default value `true`', () => {
+        onlyAuthorize(config, { refreshToken: 'such-token' });
+        expect(mockAuthorize).toHaveBeenCalledWith(
+          config.issuer,
+          config.redirectUrl,
+          config.clientId,
+          config.clientSecret,
+          config.scopes,
+          config.additionalParameters,
+          config.serviceConfiguration,
+          config.useNonce,
+          true
+        );
+      });
+
+      it('calls the native wrapper with passed value `false`', () => {
+        onlyAuthorize({ ...config, usePKCE: false }, { refreshToken: 'such-token' });
+        expect(mockAuthorize).toHaveBeenCalledWith(
+          config.issuer,
+          config.redirectUrl,
+          config.clientId,
+          config.clientSecret,
+          config.scopes,
+          config.additionalParameters,
+          config.serviceConfiguration,
+          config.useNonce,
+          false
         );
       });
     });

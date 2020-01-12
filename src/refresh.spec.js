@@ -100,4 +100,94 @@ describe('refresh', () => {
       config.serviceConfiguration
     );
   });
+
+  describe('Android-specific', () => {
+    beforeEach(() => {
+      require('react-native').Platform.OS = 'android';
+    });
+
+    afterEach(() => {
+      require('react-native').Platform.OS = 'ios';
+    });
+    describe(' dangerouslyAllowInsecureHttpRequests parameter', () => {
+      it('calls the native wrapper with default value `false`', () => {
+        refresh(config, { refreshToken: 'such-token' });
+        expect(mockRefresh).toHaveBeenCalledWith(
+          config.issuer,
+          config.redirectUrl,
+          config.clientId,
+          config.clientSecret,
+          'such-token',
+          config.scopes,
+          config.additionalParameters,
+          config.serviceConfiguration,
+          config.clientAuthMethod,
+          false,
+          config.customHeaders
+        );
+      });
+
+      it('calls the native wrapper with passed value `false`', () => {
+        refresh(
+          { ...config, dangerouslyAllowInsecureHttpRequests: false },
+          { refreshToken: 'such-token' }
+        );
+        expect(mockRefresh).toHaveBeenCalledWith(
+          config.issuer,
+          config.redirectUrl,
+          config.clientId,
+          config.clientSecret,
+          'such-token',
+          config.scopes,
+          config.additionalParameters,
+          config.serviceConfiguration,
+          config.clientAuthMethod,
+          false,
+          config.customHeaders
+        );
+      });
+
+      it('calls the native wrapper with passed value `true`', () => {
+        refresh(
+          { ...config, dangerouslyAllowInsecureHttpRequests: true },
+          { refreshToken: 'such-token' }
+        );
+        expect(mockRefresh).toHaveBeenCalledWith(
+          config.issuer,
+          config.redirectUrl,
+          config.clientId,
+          config.clientSecret,
+          'such-token',
+          config.scopes,
+          config.additionalParameters,
+          config.serviceConfiguration,
+          config.clientAuthMethod,
+          true,
+          config.customHeaders
+        );
+      });
+    });
+
+    describe('customHeaders parameter', () => {
+      it('calls the native wrapper with headers', () => {
+        const customTokenHeaders = { Authorization: 'Basic someBase64Value' };
+        const customAuthorizeHeaders = { Authorization: 'Basic someOtherBase64Value' };
+        const customHeaders = { token: customTokenHeaders, authorize: customAuthorizeHeaders };
+        refresh({ ...config, customHeaders }, { refreshToken: 'such-token' });
+        expect(mockRefresh).toHaveBeenCalledWith(
+          config.issuer,
+          config.redirectUrl,
+          config.clientId,
+          config.clientSecret,
+          'such-token',
+          config.scopes,
+          config.additionalParameters,
+          config.serviceConfiguration,
+          config.clientAuthMethod,
+          false,
+          customHeaders
+        );
+      });
+    });
+  });
 });
