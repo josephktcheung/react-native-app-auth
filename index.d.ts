@@ -93,6 +93,8 @@ export interface RefreshResult {
   tokenType: string;
 }
 
+export interface TokenExchangeRresult {}
+
 export interface RevokeConfiguration {
   tokenToRevoke: string;
   sendClientId?: boolean;
@@ -102,6 +104,17 @@ export interface RevokeConfiguration {
 export interface RefreshConfiguration {
   refreshToken: string;
 }
+
+export interface AuthorizeAndTokenResult {
+  authorizeResult: AuthorizeResult;
+  tokenResult: TokenExchangeRresult;
+}
+
+export function onlyAuthorize(config: AuthConfiguration): Promise<AuthorizeResult>;
+
+export function onlyTokenExchange(): Promise<TokenExchangeRresult>;
+
+export function authorize(config: AuthConfiguration): Promise<AuthorizeAndTokenResult>;
 
 export function prefetchConfiguration(config: AuthConfiguration): Promise<void>;
 
